@@ -1,23 +1,28 @@
 package com.manijshrestha.todolist.ui
 
+import android.support.v7.widget.RecyclerView
+import android.view.LayoutInflater.*
+import android.view.ViewGroup
+import android.widget.CheckBox
+import com.manijshrestha.todolist.R
 import com.manijshrestha.todolist.data.Task
 
-class TaskAdapter(var tasks: List<Task>) : android.support.v7.widget.RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
+class TaskAdapter(private var tasks: List<Task>) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
-    override fun onCreateViewHolder(parent: android.view.ViewGroup, type: Int): com.manijshrestha.todolist.ui.TaskAdapter.TaskViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, type: Int): TaskAdapter.TaskViewHolder {
         return TaskViewHolder(parent)
     }
 
-    override fun onBindViewHolder(viewHolder: com.manijshrestha.todolist.ui.TaskAdapter.TaskViewHolder, position: Int) {
+    override fun onBindViewHolder(viewHolder: TaskAdapter.TaskViewHolder, position: Int) {
         viewHolder.bind(tasks[position])
     }
 
     override fun getItemCount(): Int = tasks.size
 
-    inner class TaskViewHolder(parent: android.view.ViewGroup) : android.support.v7.widget.RecyclerView.ViewHolder(android.view.LayoutInflater.from(parent.context).inflate(com.manijshrestha.todolist.R.layout.item_to_do, parent, false)) {
+    inner class TaskViewHolder(parent: ViewGroup) : RecyclerView.ViewHolder(from(parent.context).inflate(R.layout.item_to_do, parent, false)) {
 
         fun bind(task: Task) = with(itemView) {
-            val taskCb = findViewById(com.manijshrestha.todolist.R.id.task_cb) as android.widget.CheckBox
+            val taskCb = findViewById<CheckBox>(R.id.task_cb)
             taskCb.text = task.description
             taskCb.isChecked = task.completed
         }

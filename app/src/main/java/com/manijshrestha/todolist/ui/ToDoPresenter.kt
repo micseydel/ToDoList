@@ -8,12 +8,12 @@ import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 
-class ToDoPresenter @Inject constructor(val taskDao: TaskDao) {
+class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
 
-    val compositeDisposable = CompositeDisposable()
-    var tasks = ArrayList<Task>()
+    private val compositeDisposable = CompositeDisposable()
+    private var tasks = ArrayList<Task>()
 
-    var presentation: ToDoPresentation? = null
+    private var presentation: ToDoPresentation? = null
 
     fun onCreate(toDoPresentation: ToDoPresentation) {
         presentation = toDoPresentation
@@ -25,18 +25,18 @@ class ToDoPresenter @Inject constructor(val taskDao: TaskDao) {
         presentation = null
     }
 
-    fun loadTasks() {
+    private fun loadTasks() {
         compositeDisposable.add(taskDao.getAllTasks()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({
+                .subscribe {
                     tasks.clear()
                     tasks.addAll(it)
                     (tasks.size - 1).takeIf { it >= 0 }?.let {
                         presentation?.taskAddedAt(it)
                         presentation?.scrollTo(it)
                     }
-                }))
+                })
 
         presentation?.showTasks(tasks)
     }
