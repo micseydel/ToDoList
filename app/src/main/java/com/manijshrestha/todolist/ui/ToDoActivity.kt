@@ -30,7 +30,10 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
         recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recyclerView?.adapter = TaskAdapter(emptyList())
 
-        addBtn?.setOnClickListener { presenter.addNewTask(taskET?.text.toString()) }
+        addBtn?.setOnClickListener {
+            presenter.addNewTask(taskET?.text.toString())
+            taskET?.text?.clear()
+        }
 
         presenter.onCreate(this)
     }
