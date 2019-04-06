@@ -5,16 +5,18 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.widget.Button
-import android.widget.CheckBox
 import android.widget.EditText
 import com.manijshrestha.todolist.R
 import com.manijshrestha.todolist.data.Task
+import com.manijshrestha.todolist.data.TaskDao
 import dagger.android.AndroidInjection
 import javax.inject.Inject
 
 class ToDoActivity : AppCompatActivity(), ToDoPresentation {
 
     @Inject lateinit var presenter: ToDoPresenter
+
+    @Inject lateinit var tasksDao: TaskDao
 
     private var taskET: EditText? = null
     private var addBtn: Button? = null
@@ -28,7 +30,7 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
         addBtn = findViewById(R.id.add_btn)
         recyclerView = findViewById(R.id.tasks_rv)
         recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView?.adapter = TaskAdapter(emptyList())
+        recyclerView?.adapter = TaskAdapter(emptyList(), tasksDao)
 
         addBtn?.setOnClickListener {
             presenter.addNewTask(taskET?.text.toString())
@@ -44,7 +46,7 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
     }
 
     override fun showTasks(tasks: List<Task>) {
-        recyclerView?.adapter = TaskAdapter(tasks)
+        recyclerView?.adapter = TaskAdapter(tasks, tasksDao)
     }
 
     override fun taskAddedAt(position: Int) {
