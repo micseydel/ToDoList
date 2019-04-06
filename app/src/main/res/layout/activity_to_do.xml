@@ -28,7 +28,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:layout_weight="1"
-                android:hint="@string/task" />
+                android:hint="@string/task"
+                android:inputType="text" />
 
             <Button
                 android:id="@+id/add_btn"
