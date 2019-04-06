@@ -30,7 +30,7 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
         addBtn = findViewById(R.id.add_btn)
         recyclerView = findViewById(R.id.tasks_rv)
         recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView?.adapter = TaskAdapter(emptyList(), tasksDao)
+        recyclerView?.adapter = TaskAdapter(mutableListOf(), tasksDao, this)
 
         addBtn?.setOnClickListener {
             presenter.addNewTask(taskET?.text.toString())
@@ -45,8 +45,8 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
         super.onDestroy()
     }
 
-    override fun showTasks(tasks: List<Task>) {
-        recyclerView?.adapter = TaskAdapter(tasks, tasksDao)
+    override fun showTasks(tasks: MutableList<Task>) {
+        recyclerView?.adapter = TaskAdapter(tasks, tasksDao, this)
     }
 
     override fun taskAddedAt(position: Int) {

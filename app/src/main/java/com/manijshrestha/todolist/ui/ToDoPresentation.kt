@@ -4,7 +4,7 @@ import com.manijshrestha.todolist.data.Task
 
 interface ToDoPresentation {
 
-    fun showTasks(tasks: List<Task>)
+    fun showTasks(tasks: MutableList<Task>)
 
     fun taskAddedAt(position: Int)
 
