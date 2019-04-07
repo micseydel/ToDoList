@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.view.KeyEvent
+import android.view.inputmethod.EditorInfo
 import android.widget.Button
 import android.widget.EditText
 import com.manijshrestha.todolist.R
@@ -18,26 +20,38 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
 
     @Inject lateinit var tasksDao: TaskDao
 
-    private var taskET: EditText? = null
-    private var addBtn: Button? = null
     private var recyclerView: RecyclerView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_to_do)
-        taskET = findViewById(R.id.task_et)
-        addBtn = findViewById(R.id.add_btn)
+
+        val taskET = findViewById<EditText>(R.id.task_et)
+        taskET?.setOnEditorActionListener { view, actionId, event ->
+            if ((event?.keyCode == KeyEvent.KEYCODE_ENTER) || (actionId == EditorInfo.IME_ACTION_DONE)) {
+                addTask(taskET)
+            }
+
+            // true here means we dismiss the keyboard
+            true
+        }
+
+        val addBtn = findViewById<Button>(R.id.add_btn)
+        addBtn?.setOnClickListener {
+            addTask(taskET)
+        }
+
         recyclerView = findViewById(R.id.tasks_rv)
         recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         recyclerView?.adapter = TaskAdapter(mutableListOf(), tasksDao, this)
 
-        addBtn?.setOnClickListener {
-            presenter.addNewTask(taskET?.text.toString())
-            taskET?.text?.clear()
-        }
-
         presenter.onCreate(this)
+    }
+
+    private fun addTask(taskET: EditText?) {
+        presenter.addNewTask(taskET?.text.toString())
+        taskET?.text?.clear()
     }
 
     override fun onDestroy() {
