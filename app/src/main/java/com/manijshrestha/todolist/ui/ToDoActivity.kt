@@ -20,7 +20,7 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
 
     @Inject lateinit var tasksDao: TaskDao
 
-    private var recyclerView: RecyclerView? = null
+    private lateinit var recyclerView: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -43,8 +43,8 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
         }
 
         recyclerView = findViewById(R.id.tasks_rv)
-        recyclerView?.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView?.adapter = TaskAdapter(mutableListOf(), tasksDao, this)
+        recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        recyclerView.adapter = TaskAdapter(mutableListOf(), tasksDao, this)
 
         presenter.onCreate(this)
     }
@@ -60,14 +60,14 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
     }
 
     override fun showTasks(tasks: MutableList<Task>) {
-        recyclerView?.adapter = TaskAdapter(tasks, tasksDao, this)
+        recyclerView.adapter = TaskAdapter(tasks, tasksDao, this)
     }
 
     override fun taskAddedAt(position: Int) {
-        recyclerView?.adapter?.notifyItemInserted(position)
+        recyclerView.adapter?.notifyItemInserted(position)
     }
 
     override fun scrollTo(position: Int) {
-        recyclerView?.smoothScrollToPosition(position)
+        recyclerView.smoothScrollToPosition(position)
     }
 }
