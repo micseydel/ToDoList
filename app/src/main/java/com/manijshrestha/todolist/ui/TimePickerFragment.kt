@@ -17,39 +17,28 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.content.res.ResourcesCompat
 import android.text.format.DateFormat
 import android.widget.TimePicker
-import android.widget.Toast
 import com.manijshrestha.todolist.R
-import com.manijshrestha.todolist.data.Task
-import com.manijshrestha.todolist.data.TaskDao
-import io.reactivex.Observable
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import java.text.SimpleDateFormat
 import java.util.Calendar
-import java.util.Date
 
 
 class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener {
 
-    lateinit var taskDao: TaskDao
-    lateinit var f: (Int) -> (Unit)
-    lateinit var task: Task
-
-    private val compositeDisposable = CompositeDisposable()
+    private var description: String? = null
+    private var notificationId: Long = -1
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val c = Calendar.getInstance()
         val hour = c.get(Calendar.HOUR_OF_DAY)
         val minute = c.get(Calendar.MINUTE)
 
+        description = arguments!!.getString("description")
+        notificationId = arguments!!.getLong("notificationId")
+
         // TODO: handle midnight properly here; switch +1hour to +1minute
         return TimePickerDialog(activity, this, hour, minute + 1, DateFormat.is24HourFormat(activity))
     }
 
     override fun onTimeSet(view: TimePicker, hourOfDay: Int, minute: Int) {
-
-        f(arguments!!.getInt("adapterPosition"))
 
         val c = Calendar.getInstance()
         c.set(Calendar.YEAR, arguments!!.getInt("year"))
@@ -60,29 +49,19 @@ class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener 
         c.set(Calendar.SECOND, 0) // don't wait into the minute
 
         val instantMillis = c.toInstant().toEpochMilli()
-        val future = SimpleDateFormat.getDateTimeInstance().format(Date(instantMillis))
-        System.out.println("Scheduling notification for $future")
+        Intent().also { newIntent -> // FIXME: also()? wtf?
+            newIntent.action = "com.an.sms.example2"
 
-        Toast.makeText(
-                context,
-                future,
-                Toast.LENGTH_SHORT
-        ).show()
+            newIntent.putExtra("adapterPosition", arguments!!.getInt("adapterPosition"))
+            newIntent.putExtra("instantMillis", instantMillis)
 
-        task.snoozedTo = instantMillis
-        compositeDisposable.add(Observable.fromCallable { taskDao.updateTask(task) }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe())
+            context?.sendBroadcast(newIntent)
+        }
 
-        scheduleNotification(
-                context!!,
-                c.timeInMillis - Calendar.getInstance().timeInMillis,
-                -1
-        )
+        scheduleNotification(context!!, c.timeInMillis - Calendar.getInstance().timeInMillis)
     }
 
-    private fun scheduleNotification(context: Context, delayMillis: Long, notificationId: Int) {
+    private fun scheduleNotification(context: Context, delayMillis: Long) {
         System.out.println("Scheduling notification... for ${delayMillis / 1000}s from now")
 
         val mNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -95,14 +74,19 @@ class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener 
 
         val builder = NotificationCompat.Builder(context, channelId)
                 .setContentTitle(context.getString(R.string.reminder))
-                .setContentText(task.description)
+                .setContentText(description)
                 .setAutoCancel(true)
                 .setSmallIcon(R.drawable.equalsd)
                 .setLargeIcon((ResourcesCompat.getDrawable(resources, R.drawable.lightning_rounded, null) as BitmapDrawable).bitmap)
                 .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
 
         val intent = Intent(context, ToDoActivity::class.java)
-        val activity = PendingIntent.getActivity(context, notificationId, intent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val activity = PendingIntent.getActivity(
+                context,
+                notificationId.toInt(), // FIXME: find a nicer way around this; same below
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT
+        )
         builder.setContentIntent(activity)
 
         val notification = builder.build()
@@ -110,7 +94,7 @@ class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener 
         val notificationIntent = Intent(context, ToDoListNotificationPublisher::class.java)
         notificationIntent.putExtra(ToDoListNotificationPublisher.NOTIFICATION_ID, notificationId)
         notificationIntent.putExtra(ToDoListNotificationPublisher.NOTIFICATION, notification)
-        val pendingIntent = PendingIntent.getBroadcast(context, notificationId, notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT)
+        val pendingIntent = PendingIntent.getBroadcast(context, notificationId.toInt(), notificationIntent, PendingIntent.FLAG_CANCEL_CURRENT)
 
         val futureInMillis = SystemClock.elapsedRealtime() + delayMillis
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager

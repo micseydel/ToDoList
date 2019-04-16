@@ -12,11 +12,6 @@ import java.util.Calendar
 
 class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
 
-    lateinit var taskDao: TaskDao
-    // FIXME: give a more meaningful name
-    lateinit var f: (Int) -> (Unit)
-    lateinit var task: Task
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         // Use the current date as the default date in the picker
         val c = Calendar.getInstance()
@@ -32,9 +27,6 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
     override fun onDateSet(view: DatePicker, year: Int, month: Int, day: Int) {
         // FIXME: verify not in the past
         val fragment = TimePickerFragment()
-        fragment.taskDao = taskDao
-        fragment.task = task
-        fragment.f = f
 
         arguments!!.putInt("year", year)
         arguments!!.putInt("month", month)

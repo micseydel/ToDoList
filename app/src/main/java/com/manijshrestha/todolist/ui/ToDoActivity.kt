@@ -12,7 +12,6 @@ import com.manijshrestha.todolist.R
 import com.manijshrestha.todolist.data.Task
 import com.manijshrestha.todolist.data.TaskDao
 import dagger.android.AndroidInjection
-import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
 class ToDoActivity : AppCompatActivity(), ToDoPresentation {
@@ -22,8 +21,6 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
     @Inject lateinit var taskDao: TaskDao
 
     private lateinit var recyclerView: RecyclerView
-
-    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
