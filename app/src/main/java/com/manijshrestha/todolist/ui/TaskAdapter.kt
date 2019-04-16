@@ -10,7 +10,6 @@ import android.content.IntentFilter
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
-import android.util.Log
 import android.view.LayoutInflater.from
 import android.view.ViewGroup
 import android.widget.CheckBox
@@ -21,7 +20,6 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.lang.RuntimeException
 
 
 class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: TaskDao, private val activity: Activity) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
@@ -105,7 +103,6 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
     }
 
     private fun registerBroadcastReceiver() {
-        Log.e("canary", "registering...")
         val broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 // FIXME: don't want these default arguments; else will have to check them
@@ -114,7 +111,6 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
                 val task = tasks[adapterPosition]
 
                 task.snoozedTo = intent.getLongExtra("instantMillis", -1)
-                // FIXME: do we need this song and dance here? (probably)
                 compositeDisposable.add(Observable.fromCallable { taskDao.updateTask(task) }
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())

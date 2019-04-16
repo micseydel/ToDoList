@@ -10,8 +10,6 @@ import android.content.Intent
 class ToDoListNotificationPublisher : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        System.out.println("onReceive")
-
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val notification = intent.getParcelableExtra<Notification>(NOTIFICATION)
@@ -19,7 +17,7 @@ class ToDoListNotificationPublisher : BroadcastReceiver() {
         notificationManager.notify(notificationId, notification)
 
         Intent().also { newIntent -> // FIXME: also()? wtf?
-            newIntent.action = "com.an.sms.example"
+            newIntent.action = "com.an.sms.example" // FIXME: factor this out into companion
 //            intent.putExtra("data", "Notice me senpai!")
             context.sendBroadcast(newIntent)
         }

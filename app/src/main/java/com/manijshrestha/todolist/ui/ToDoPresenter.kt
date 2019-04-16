@@ -56,7 +56,6 @@ class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
     }
 
     private fun registerBroadcastReceiver() {
-        Log.e("canary", "registering...")
         val broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 loadTasks()

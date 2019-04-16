@@ -17,6 +17,7 @@ import android.support.v4.app.NotificationCompat
 import android.support.v4.content.res.ResourcesCompat
 import android.text.format.DateFormat
 import android.widget.TimePicker
+import android.widget.Toast
 import com.manijshrestha.todolist.R
 import java.util.Calendar
 
@@ -48,17 +49,31 @@ class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener 
         c.set(Calendar.MINUTE, minute)
         c.set(Calendar.SECOND, 0) // don't wait into the minute
 
-        val instantMillis = c.toInstant().toEpochMilli()
-        Intent().also { newIntent -> // FIXME: also()? wtf?
-            newIntent.action = "com.an.sms.example2"
+        val now = Calendar.getInstance()
 
-            newIntent.putExtra("adapterPosition", arguments!!.getInt("adapterPosition"))
-            newIntent.putExtra("instantMillis", instantMillis)
+        if (c.before(now)) {
+            Toast.makeText(
+                    context,
+                    "Must select a time in the future!", // FIXME: factor out into strings!
+                    Toast.LENGTH_SHORT
+            ).show()
 
-            context?.sendBroadcast(newIntent)
+            val fragment = TimePickerFragment()
+            fragment.arguments = arguments
+            fragment.show(fragmentManager, tag)
+        } else {
+            val instantMillis = c.toInstant().toEpochMilli()
+            Intent().also { newIntent ->
+                newIntent.action = "com.an.sms.example2"
+
+                newIntent.putExtra("adapterPosition", arguments!!.getInt("adapterPosition"))
+                newIntent.putExtra("instantMillis", instantMillis)
+
+                context?.sendBroadcast(newIntent)
+            }
+
+            scheduleNotification(context!!, c.timeInMillis - Calendar.getInstance().timeInMillis)
         }
-
-        scheduleNotification(context!!, c.timeInMillis - Calendar.getInstance().timeInMillis)
     }
 
     private fun scheduleNotification(context: Context, delayMillis: Long) {
