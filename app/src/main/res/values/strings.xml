@@ -8,7 +8,10 @@
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="snooze">Snooze</string>
 
     <string name="done">done</string>
     <string name="incomplete">incomplete</string>
+
+    <string name="reminder">Reminder</string>
 </resources>

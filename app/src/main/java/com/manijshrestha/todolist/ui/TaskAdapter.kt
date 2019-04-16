@@ -1,6 +1,10 @@
 package com.manijshrestha.todolist.ui
 
 import android.app.Activity
+import android.app.AlertDialog
+import android.content.DialogInterface
+import android.os.Bundle
+import android.support.v4.app.FragmentActivity
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater.from
 import android.view.ViewGroup
@@ -12,17 +16,15 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import android.app.AlertDialog
-import android.content.DialogInterface
 
 
 class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: TaskDao, private val activity: Activity) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
 
-    override fun onCreateViewHolder(parent: ViewGroup, type: Int): TaskAdapter.TaskViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, type: Int): TaskViewHolder {
         return TaskViewHolder(parent)
     }
 
-    override fun onBindViewHolder(viewHolder: TaskAdapter.TaskViewHolder, position: Int) {
+    override fun onBindViewHolder(viewHolder: TaskViewHolder, position: Int) {
         viewHolder.bind(tasks[position])
     }
 
@@ -58,20 +60,34 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
                 )
 
                 dialog.setButton(DialogInterface.BUTTON_POSITIVE, activity.getString(R.string.yes)) { _, _ ->
-                    tasks.removeAt(adapterPosition)
-                    notifyItemRemoved(adapterPosition)
-                    notifyItemRangeChanged(adapterPosition, tasks.size)
+                    removeFromViewAt(adapterPosition)
 
-                    compositeDisposable.add(Observable.fromCallable {
-                        taskDao.deleteTask(task)
-                    }
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe())
+                    compositeDisposable.add(
+                            Observable.fromCallable {
+                                taskDao.deleteTask(task)
+                            }
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe())
                 }
 
                 dialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getString(R.string.no)) { _, _ ->
-                    // we intentionally do nothing in this case
+                    // just create the button, it doesn't need to do anything
+                    // (default behavior dismisses the dialog on press)
+                }
+
+                dialog.setButton(DialogInterface.BUTTON_NEUTRAL, activity.getString(R.string.snooze)) { _, _ ->
+                    val fragment = DatePickerFragment()
+                    // FIXME: refactor these away?
+                    fragment.taskDao = taskDao
+                    fragment.task = tasks[adapterPosition]
+                    fragment.f = ::removeFromViewAt
+
+                    val bundle = Bundle()
+                    bundle.putInt("adapterPosition", adapterPosition)
+                    fragment.arguments = bundle
+
+                    fragment.show((activity as FragmentActivity).supportFragmentManager, "timepickerstart")
                 }
 
                 dialog.show()
@@ -79,5 +95,11 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
                 true
             }
         }
+    }
+
+    private fun removeFromViewAt(adapterPosition: Int) {
+        tasks.removeAt(adapterPosition)
+        notifyItemRemoved(adapterPosition)
+        notifyItemRangeChanged(adapterPosition, tasks.size)
     }
 }

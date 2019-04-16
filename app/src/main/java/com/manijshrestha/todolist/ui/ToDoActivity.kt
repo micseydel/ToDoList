@@ -12,15 +12,18 @@ import com.manijshrestha.todolist.R
 import com.manijshrestha.todolist.data.Task
 import com.manijshrestha.todolist.data.TaskDao
 import dagger.android.AndroidInjection
+import io.reactivex.disposables.CompositeDisposable
 import javax.inject.Inject
 
 class ToDoActivity : AppCompatActivity(), ToDoPresentation {
 
     @Inject lateinit var presenter: ToDoPresenter
 
-    @Inject lateinit var tasksDao: TaskDao
+    @Inject lateinit var taskDao: TaskDao
 
     private lateinit var recyclerView: RecyclerView
+
+    private val compositeDisposable = CompositeDisposable()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
@@ -44,7 +47,7 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
 
         recyclerView = findViewById(R.id.tasks_rv)
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView.adapter = TaskAdapter(mutableListOf(), tasksDao, this)
+        recyclerView.adapter = TaskAdapter(mutableListOf(), taskDao, this)
 
         presenter.onCreate(this)
     }
@@ -60,7 +63,7 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
     }
 
     override fun showTasks(tasks: MutableList<Task>) {
-        recyclerView.adapter = TaskAdapter(tasks, tasksDao, this)
+        recyclerView.adapter = TaskAdapter(tasks, taskDao, this)
     }
 
     override fun taskAddedAt(position: Int) {

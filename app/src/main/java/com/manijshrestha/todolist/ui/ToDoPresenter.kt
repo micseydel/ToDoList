@@ -1,5 +1,10 @@
 package com.manijshrestha.todolist.ui
 
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.util.Log
 import com.manijshrestha.todolist.data.Task
 import com.manijshrestha.todolist.data.TaskDao
 import io.reactivex.Observable
@@ -13,11 +18,12 @@ class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
     private val compositeDisposable = CompositeDisposable()
     private var tasks = ArrayList<Task>()
 
-    private var presentation: ToDoPresentation? = null
+    private var presentation: ToDoActivity? = null
 
-    fun onCreate(toDoPresentation: ToDoPresentation) {
+    fun onCreate(toDoPresentation: ToDoActivity) {
         presentation = toDoPresentation
         loadTasks()
+        registerBroadcastReceiver()
     }
 
     fun onDestroy() {
@@ -26,7 +32,7 @@ class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
     }
 
     private fun loadTasks() {
-        compositeDisposable.add(taskDao.getAllTasks()
+        compositeDisposable.add(taskDao.getAllUnsnoozedTasks()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe {
@@ -47,5 +53,15 @@ class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe())
+    }
+
+    private fun registerBroadcastReceiver() {
+        Log.e("canary", "registering...")
+        val broadcastReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                loadTasks()
+            }
+        }
+        presentation?.applicationContext?.registerReceiver(broadcastReceiver, IntentFilter("com.an.sms.example"))
     }
 }
