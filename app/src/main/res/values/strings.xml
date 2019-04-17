@@ -8,7 +8,13 @@
 
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="snooze">Snooze</string>
 
     <string name="done">done</string>
     <string name="incomplete">incomplete</string>
+
+    <string name="reminder">Reminder</string>
+
+    <string name="must_select_a_date_in_the_future">Must select a date in the future!</string>
+    <string name="must_select_a_time_in_the_future">Must select a time in the future!</string>
 </resources>
