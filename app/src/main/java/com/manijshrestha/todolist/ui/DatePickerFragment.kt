@@ -7,8 +7,7 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentActivity
 import android.widget.DatePicker
 import android.widget.Toast
-import com.manijshrestha.todolist.data.Task
-import com.manijshrestha.todolist.data.TaskDao
+import com.manijshrestha.todolist.R
 import java.util.Calendar
 
 class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener {
@@ -20,8 +19,7 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
         val month = c.get(Calendar.MONTH)
         val day = c.get(Calendar.DAY_OF_MONTH)
 
-        // FIXME: figure out this warning
-        // code from https://developer.android.com/guide/topics/ui/controls/pickers.html
+        // I'm really not sure what to do about this warning
         return DatePickerDialog(activity, this, year, month, day)
     }
 
@@ -36,7 +34,7 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
         if (toCheck.before(now)) {
             Toast.makeText(
                     context,
-                    "Must select a date in the future!", // FIXME: factor out into strings!
+                    context!!.getString(R.string.must_select_a_date_in_the_future),
                     Toast.LENGTH_SHORT
             ).show()
 
@@ -46,12 +44,16 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
         } else {
             val fragment = TimePickerFragment()
 
-            arguments!!.putInt("year", year) // FIXME: factor out strings into companion
-            arguments!!.putInt("month", month)
-            arguments!!.putInt("day", day)
+            arguments!!.putInt(ToDoListNotificationPublisher.YEAR, year)
+            arguments!!.putInt(ToDoListNotificationPublisher.MONTH, month)
+            arguments!!.putInt(ToDoListNotificationPublisher.DAY, day)
             fragment.arguments = arguments
 
-            fragment.show((activity as FragmentActivity).supportFragmentManager, "timepickerfinish") // FIXME: factor out into companion
+            fragment.show((activity as FragmentActivity).supportFragmentManager, TAG)
         }
+    }
+
+    companion object {
+        const val TAG = "timepickerfinish"
     }
 }

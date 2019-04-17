@@ -87,12 +87,12 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
                     val fragment = DatePickerFragment()
 
                     val bundle = Bundle()
-                    bundle.putInt("adapterPosition", adapterPosition)
-                    bundle.putString("description", tasks[adapterPosition].description)
-                    bundle.putLong("notificationId", tasks[adapterPosition].id)
+                    bundle.putInt(ToDoListNotificationPublisher.ADAPTER_POSITION, adapterPosition)
+                    bundle.putString(ToDoListNotificationPublisher.DESCRIPTION, tasks[adapterPosition].description)
+                    bundle.putLong(ToDoListNotificationPublisher.NOTIFICATIONID, tasks[adapterPosition].id)
                     fragment.arguments = bundle
 
-                    fragment.show((activity as FragmentActivity).supportFragmentManager, "timepickerstart")
+                    fragment.show((activity as FragmentActivity).supportFragmentManager, TAG)
                 }
 
                 dialog.show()
@@ -105,12 +105,11 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
     private fun registerBroadcastReceiver() {
         val broadcastReceiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                // FIXME: don't want these default arguments; else will have to check them
-                val adapterPosition = intent.getIntExtra("adapterPosition", -1)
+                val adapterPosition = intent.getIntExtra(ToDoListNotificationPublisher.ADAPTER_POSITION, -1)
 
                 val task = tasks[adapterPosition]
 
-                task.snoozedTo = intent.getLongExtra("instantMillis", -1)
+                task.snoozedTo = intent.getLongExtra(ToDoListNotificationPublisher.INSTANT_MILLIS, -1)
                 compositeDisposable.add(Observable.fromCallable { taskDao.updateTask(task) }
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
@@ -119,12 +118,16 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
                 removeFromViewAt(adapterPosition)
             }
         }
-        activity.applicationContext.registerReceiver(broadcastReceiver, IntentFilter("com.an.sms.example2"))
+        activity.applicationContext.registerReceiver(broadcastReceiver, IntentFilter(TimePickerFragment.INTENT_ACTION))
     }
 
     private fun removeFromViewAt(adapterPosition: Int) {
         tasks.removeAt(adapterPosition)
         notifyItemRemoved(adapterPosition)
         notifyItemRangeChanged(adapterPosition, tasks.size)
+    }
+
+    companion object {
+        const val TAG = "timepickerstart"
     }
 }

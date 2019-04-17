@@ -16,15 +16,26 @@ class ToDoListNotificationPublisher : BroadcastReceiver() {
         val notificationId = intent.getIntExtra(NOTIFICATION_ID, 0)
         notificationManager.notify(notificationId, notification)
 
-        Intent().also { newIntent -> // FIXME: also()? wtf?
-            newIntent.action = "com.an.sms.example" // FIXME: factor this out into companion
-//            intent.putExtra("data", "Notice me senpai!")
-            context.sendBroadcast(newIntent)
-        }
+        val newIntent = Intent()
+        newIntent.action = INTENT_ACTION
+        context.sendBroadcast(newIntent)
     }
 
     companion object {
-        var NOTIFICATION_ID = "notification_id"
-        var NOTIFICATION = "notification"
+        const val NOTIFICATION_ID = "notification_id"
+        const val NOTIFICATION = "notification"
+
+        const val YEAR = "year"
+        const val MONTH = "month"
+        const val DAY = "day"
+
+        const val ADAPTER_POSITION = "adapterPosition"
+        const val INSTANT_MILLIS = "instantMillis"
+
+        const val INTENT_ACTION = "me.micseydel.todolist.notification"
+
+        const val DESCRIPTION = "description"
+
+        const val NOTIFICATIONID = "notificationId"
     }
 }

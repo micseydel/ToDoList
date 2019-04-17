@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.util.Log
 import com.manijshrestha.todolist.data.Task
 import com.manijshrestha.todolist.data.TaskDao
 import io.reactivex.Observable
@@ -61,6 +60,6 @@ class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
                 loadTasks()
             }
         }
-        presentation?.applicationContext?.registerReceiver(broadcastReceiver, IntentFilter("com.an.sms.example"))
+        presentation?.applicationContext?.registerReceiver(broadcastReceiver, IntentFilter(ToDoListNotificationPublisher.INTENT_ACTION))
     }
 }
