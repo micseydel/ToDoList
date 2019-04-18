@@ -37,9 +37,9 @@ class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
                 .subscribe {
                     tasks.clear()
                     tasks.addAll(it)
-                    (tasks.size - 1).takeIf { it >= 0 }?.let {
-                        presentation?.taskAddedAt(it)
-                        presentation?.scrollTo(it)
+                    (tasks.size - 1).takeIf { it >= 0 }!!.let { position ->
+                        presentation?.taskAddedAt(position)
+                        presentation?.scrollTo(position)
                     }
                 })
 

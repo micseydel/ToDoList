@@ -18,6 +18,8 @@ class ToDoListNotificationPublisher : BroadcastReceiver() {
 
         val newIntent = Intent()
         newIntent.action = INTENT_ACTION
+
+        // TODO: https://developer.android.com/reference/android/support/v4/content/LocalBroadcastManager
         context.sendBroadcast(newIntent)
     }
 
