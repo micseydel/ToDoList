@@ -15,7 +15,7 @@ import javax.inject.Inject
 class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
 
     private val compositeDisposable = CompositeDisposable()
-    private var tasks = ArrayList<Task>()
+    private val tasks = ArrayList<Task>()
 
     private var presentation: ToDoActivity? = null
 
@@ -37,7 +37,7 @@ class ToDoPresenter @Inject constructor(private val taskDao: TaskDao) {
                 .subscribe {
                     tasks.clear()
                     tasks.addAll(it)
-                    (tasks.size - 1).takeIf { it >= 0 }!!.let { position ->
+                    (tasks.size - 1).takeIf { it >= 0 }?.let { position ->
                         presentation?.taskAddedAt(position)
                         presentation?.scrollTo(position)
                     }
