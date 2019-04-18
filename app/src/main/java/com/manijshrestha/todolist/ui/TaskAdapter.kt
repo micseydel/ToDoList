@@ -20,6 +20,8 @@ import io.reactivex.Observable
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import android.widget.LinearLayout
+import android.widget.EditText
 
 
 class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: TaskDao, private val activity: Activity) : RecyclerView.Adapter<TaskAdapter.TaskViewHolder>() {
@@ -45,11 +47,11 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
         private val compositeDisposable = CompositeDisposable()
 
         fun bind(task: Task) = with(itemView) {
-            val taskCb = findViewById<CheckBox>(R.id.task_cb)
-            taskCb.text = task.description
-            taskCb.isChecked = task.completed
+            val taskCheckbox = findViewById<CheckBox>(R.id.task_checkbox)
+            taskCheckbox.text = task.description
+            taskCheckbox.isChecked = task.completed
 
-            taskCb.setOnCheckedChangeListener { _, isChecked ->
+            taskCheckbox.setOnCheckedChangeListener { _, isChecked ->
                 task.completed = isChecked
 
                 compositeDisposable.add(Observable.fromCallable { taskDao.updateTask(task) }
@@ -58,50 +60,7 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
                         .subscribe())
             }
 
-            taskCb.setOnLongClickListener {
-                val dialog = AlertDialog.Builder(activity).create()
-                dialog.setTitle(activity.getString(R.string.delete_question))
-                dialog.setMessage(
-                        activity.getString(R.string.delete_question_long)
-                                .format(
-                                        if (task.completed) activity.getString(R.string.done) else activity.getString(R.string.incomplete),
-                                        task.description
-                                )
-                )
-
-                dialog.setButton(DialogInterface.BUTTON_POSITIVE, activity.getString(R.string.yes)) { _, _ ->
-                    removeFromViewAt(adapterPosition)
-
-                    compositeDisposable.add(
-                            Observable.fromCallable {
-                                taskDao.deleteTask(task)
-                            }
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe())
-                }
-
-                dialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getString(R.string.no)) { _, _ ->
-                    // just create the button, it doesn't need to do anything
-                    // (default behavior dismisses the dialog on press)
-                }
-
-                dialog.setButton(DialogInterface.BUTTON_NEUTRAL, activity.getString(R.string.snooze)) { _, _ ->
-                    val fragment = DatePickerFragment()
-
-                    val bundle = Bundle()
-                    bundle.putInt(ToDoListNotificationPublisher.ADAPTER_POSITION, adapterPosition)
-                    bundle.putString(ToDoListNotificationPublisher.DESCRIPTION, tasks[adapterPosition].description)
-                    bundle.putLong(ToDoListNotificationPublisher.NOTIFICATIONID, tasks[adapterPosition].id)
-                    fragment.arguments = bundle
-
-                    fragment.show((activity as FragmentActivity).supportFragmentManager, TAG)
-                }
-
-                dialog.show()
-
-                true
-            }
+            setTaskCheckboxOnClickListener(taskCheckbox, task, adapterPosition)
         }
     }
 
@@ -128,6 +87,76 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
         tasks.removeAt(adapterPosition)
         notifyItemRemoved(adapterPosition)
         notifyItemRangeChanged(adapterPosition, tasks.size)
+    }
+
+    private fun setTaskCheckboxOnClickListener(taskCheckbox: CheckBox, task: Task, adapterPosition: Int) {
+        taskCheckbox.setOnLongClickListener {
+            val dialog = AlertDialog.Builder(activity).create()
+            dialog.setTitle(activity.getString(R.string.edit_action_question))
+            dialog.setMessage(
+                    activity.getString(R.string.tap_outside_to_cancel)
+                            .format(
+                                    if (task.completed) activity.getString(R.string.done) else activity.getString(R.string.incomplete),
+                                    task.description
+                            )
+            )
+
+            dialog.setButton(DialogInterface.BUTTON_POSITIVE, activity.getString(R.string.delete)) { _, _ ->
+                removeFromViewAt(adapterPosition)
+
+                compositeDisposable.add(
+                        Observable.fromCallable {
+                            taskDao.deleteTask(task)
+                        }
+                                .subscribeOn(Schedulers.io())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe())
+            }
+
+            dialog.setButton(DialogInterface.BUTTON_NEUTRAL, activity.getString(R.string.snooze)) { _, _ ->
+                val fragment = DatePickerFragment()
+
+                val bundle = Bundle()
+                bundle.putInt(ToDoListNotificationPublisher.ADAPTER_POSITION, adapterPosition)
+                bundle.putString(ToDoListNotificationPublisher.DESCRIPTION, tasks[adapterPosition].description)
+                bundle.putLong(ToDoListNotificationPublisher.NOTIFICATIONID, tasks[adapterPosition].id)
+                fragment.arguments = bundle
+
+                fragment.show((activity as FragmentActivity).supportFragmentManager, TAG)
+            }
+
+            dialog.setButton(DialogInterface.BUTTON_NEGATIVE, activity.getString(R.string.edit)) { _, _ ->
+                val alertDialog = AlertDialog.Builder(activity)
+                alertDialog.setTitle(activity.getString(R.string.edit_alert_content))
+
+                val input = EditText(activity)
+                input.setPadding(50, 0, 0, 30)
+                input.setText(task.description)
+                val lp = LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.MATCH_PARENT)
+                input.layoutParams = lp
+                alertDialog.setView(input)
+
+                alertDialog.setPositiveButton(R.string.confirm) { dialog, which ->
+                    taskCheckbox.text = input.text
+                    compositeDisposable.add(
+                            Observable.fromCallable {
+                                task.description = input.text.toString()
+                                taskDao.updateTask(task)
+                            }
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe())
+                }
+
+                alertDialog.show()
+            }
+
+            dialog.show()
+
+            true
+        }
     }
 
     companion object {

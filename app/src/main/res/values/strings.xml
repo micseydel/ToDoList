@@ -3,12 +3,15 @@
     <string name="task">Task</string>
     <string name="add">Add</string>
 
-    <string name="delete_question">Delete?</string>
-    <string name="delete_question_long">Delete task (%s) "%s"?\</string>
+    <string name="edit_action_question">Which action?</string>
+    <string name="tap_outside_to_cancel">Tap outside to cancel.</string>
 
+    <string name="delete">Delete</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="snooze">Snooze</string>
+    <string name="edit">Edit</string>
+    <string name="confirm">Confirm</string>
 
     <string name="done">done</string>
     <string name="incomplete">incomplete</string>
@@ -17,4 +20,6 @@
 
     <string name="must_select_a_date_in_the_future">Must select a date in the future!</string>
     <string name="must_select_a_time_in_the_future">Must select a time in the future!</string>
+
+    <string name="edit_alert_content">Edit reminder content</string>
 </resources>
