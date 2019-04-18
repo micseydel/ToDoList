@@ -47,7 +47,8 @@ class TimePickerFragment : DialogFragment(), TimePickerDialog.OnTimeSetListener 
         c.set(Calendar.DAY_OF_MONTH, arguments!!.getInt(ToDoListNotificationPublisher.DAY))
         c.set(Calendar.HOUR_OF_DAY, hourOfDay)
         c.set(Calendar.MINUTE, minute)
-        c.set(Calendar.SECOND, 0) // don't wait into the minute
+        c.set(Calendar.SECOND, 0) // start at the top of the minute
+        c.set(Calendar.MILLISECOND, 0)
 
         val now = Calendar.getInstance()
 

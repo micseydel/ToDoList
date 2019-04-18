@@ -29,9 +29,15 @@ class DatePickerFragment : DialogFragment(), DatePickerDialog.OnDateSetListener 
         toCheck.set(Calendar.MONTH, month)
         toCheck.set(Calendar.DAY_OF_MONTH, day)
 
-        val now = Calendar.getInstance()
+        val today = Calendar.getInstance()
 
-        if (toCheck.before(now)) {
+        for (time in listOf(toCheck, today)) {
+            time.set(Calendar.MINUTE, 0)
+            time.set(Calendar.SECOND, 0)
+            time.set(Calendar.MILLISECOND, 0)
+        }
+
+        if (toCheck.before(today)) {
             Toast.makeText(
                     context,
                     context!!.getString(R.string.must_select_a_date_in_the_future),
