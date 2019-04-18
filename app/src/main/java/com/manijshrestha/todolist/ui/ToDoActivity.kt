@@ -49,8 +49,10 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
     }
 
     private fun addTask(taskET: EditText?) {
-        presenter.addNewTask(taskET?.text.toString())
-        taskET?.text?.clear()
+        if (taskET?.text.toString().isNotEmpty()) {
+            presenter.addNewTask(taskET?.text.toString())
+            taskET?.text?.clear()
+        }
     }
 
     override fun onDestroy() {
