@@ -44,7 +44,6 @@ class ToDoActivity : AppCompatActivity(), ToDoPresentation {
 
         recyclerView = findViewById(R.id.tasks_rv)
         recyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        recyclerView.adapter = TaskAdapter(mutableListOf(), taskDao, this)
 
         presenter.onCreate(this)
     }

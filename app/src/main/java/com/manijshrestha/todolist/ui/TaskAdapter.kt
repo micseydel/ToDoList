@@ -26,8 +26,11 @@ class TaskAdapter(private val tasks: MutableList<Task>, private val taskDao: Tas
 
     private val compositeDisposable = CompositeDisposable()
 
-    override fun onCreateViewHolder(parent: ViewGroup, type: Int): TaskViewHolder {
+    init {
         registerBroadcastReceiver()
+    }
+
+    override fun onCreateViewHolder(parent: ViewGroup, type: Int): TaskViewHolder {
         return TaskViewHolder(parent)
     }
 
